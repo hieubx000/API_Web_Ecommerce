@@ -3,6 +3,8 @@ const express = require('express');
 require("express-async-errors")
 const mongoose = require('mongoose')
 const CategoryRouter = require('./modules/category')
+const SubCategoryRouter = require('./modules/sub-category')
+const BrandRouter = require('./modules/brand')
 const errorHandler = require('./common/errorHandler')
 
 
@@ -14,6 +16,8 @@ async function main() {
     app.use(express.json());
 
     app.use('/category/', CategoryRouter)
+    app.use('/sub-category', SubCategoryRouter)
+    app.use('/brand', BrandRouter)
 
     app.use(errorHandler)
 

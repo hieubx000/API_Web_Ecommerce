@@ -70,10 +70,20 @@ const updateCategory = async(req, res) => {
     })
 }
 
+const deleteCategory = async(req, res) => {
+    const { slug } = req.params;
+    const deleteCategory = await CategoryModel.findOneAndDelete({ slug })
+    res.send({
+        success: 1,
+        data: deleteCategory
+    })
+}
+
 
 module.exports = {
     getAllCategory,
     getCategory,
     createCategory,
-    updateCategory
+    updateCategory,
+    deleteCategory
 }
