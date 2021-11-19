@@ -1,6 +1,8 @@
 const SubCategoryModel = require('./sub-category')
 const CategoryModel = require('../category/category')
-const HttpError = require('../../common/httpError')
+const HttpError = require('../../common/httpError');
+const ProductModel = require('../product/product');
+const BrandModel = require('../brand/brand')
 
 const getAllSubCategory = async(req, res) => {
     const category = await SubCategoryModel.find();
@@ -13,10 +15,16 @@ const getAllSubCategory = async(req, res) => {
 const getSubCategory = async(req, res) => {
     const { slug } = req.params;
     const foundSubCategory = await SubCategoryModel.findOne({ slug })
+    const subCategoryId = foundSubCategory.id
+    const foundProduct = await ProductModel.findOne({ subCategoryId })
 
+    const foundBrand = await BrandModel.findOne({ subCategoryId })
+    const brandId = foundBrand.id
+    console.log(foundBrand);
+    foundProduct += await ProductModel.findOne({ brandId })
     res.send({
         success: 1,
-        data: foundSubCategory
+        data: foundProduct
     })
 }
 
