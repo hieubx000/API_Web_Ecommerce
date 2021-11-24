@@ -4,10 +4,35 @@ const SubCategoryModel = require('../sub-category/sub-category')
 const HttpError = require('../../common/httpError')
 
 const getAllProduct = async(req, res) => {
-    const product = await ProductModel.find();
+    const { keyword, sortDirection, sortField, skip, limit } = req.query
+
+    // FILTER
+    const keywordFilter = keyword ? { name: { $regex: new RegExp(keyword, 'i') } } : {}
+
+    // SORT
+    const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
+    const sortParams = sortField ? {
+        [sortField]: sortDirectionParams
+    } : {}
+
+    // PAGINATION
+    const pagination = {
+        skip: skip ? Number(skip) : 0,
+        limit: limit ? Number(limit) : 24
+    }
+
+    const [product, totalProduct] = await Promise.all([
+        ProductModel
+        .find(keywordFilter)
+        .sort(sortParams)
+        .skip(pagination.skip)
+        .limit(pagination.limit),
+        ProductModel.find(keywordFilter).countDocuments()
+    ])
     res.send({
         success: 1,
-        data: product
+        data: product,
+        total: totalProduct
     })
 }
 
@@ -22,11 +47,10 @@ const getProduct = async(req, res) => {
 }
 
 const createProduct = async(req, res) => {
+    console.log("hi");
     const productData = req.body;
     const name = productData.name
-    if (!name) {
-        throw new HttpError("Product không được để trống", 422)
-    }
+
     const existedProduct = await ProductModel.findOne({ name })
     if (existedProduct) {
         throw new HttpError("Product đã tồn tại", 400)
@@ -59,7 +83,7 @@ const updateProduct = async(req, res) => {
             throw new HttpError("Brand đã tồn tại", 400)
         }
     }
-    console.log("hihi");
+
     const existedSubCategory = await SubCategoryModel.findById(updateData.subCategoryId)
     if (!existedSubCategory && updateData.subCategoryId) {
         throw new HttpError("Không có Sub-Category", 400)

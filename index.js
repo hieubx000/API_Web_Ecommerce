@@ -8,7 +8,6 @@ const BrandRouter = require('./modules/brand')
 const ProductRouter = require('./modules/product')
 const errorHandler = require('./common/errorHandler')
 
-
 async function main() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("MongoDB Connected");
@@ -19,7 +18,7 @@ async function main() {
     app.use('/category/', CategoryRouter)
     app.use('/sub-category', SubCategoryRouter)
     app.use('/brand', BrandRouter)
-    app.use('/', ProductRouter)
+    app.use('/product', ProductRouter)
 
     app.use(errorHandler)
 

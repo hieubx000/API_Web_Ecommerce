@@ -4,18 +4,70 @@ const ProductModel = require('../product/product')
 const HttpError = require('../../common/httpError')
 
 const getAllBrand = async(req, res) => {
-    const brand = await BrandModel.find();
+    const { keyword, sortDirection, sortField, skip, limit } = req.query
+
+    // FILTER
+    const keywordFilter = keyword ? { name: { $regex: new RegExp(keyword, 'i') } } : {};
+
+    // SORT
+    const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
+    const sortParams = sortField ? {
+        [sortField]: sortDirectionParams
+    } : {}
+
+    // PAGINATION
+    const pagination = {
+        skip: skip ? Number(skip) : 0,
+        limit: limit ? Number(limit) : 100
+    }
+
+    const [brand, totalBrand] = await Promise.all([
+        BrandModel
+        .find(keywordFilter)
+        .sort(sortParams)
+        .skip(pagination.skip)
+        .limit(pagination.limit),
+        BrandModel.find(keywordFilter).countDocuments()
+    ])
+
     res.send({
         success: 1,
-        data: brand
+        data: brand,
+        totalBrand
     })
 }
 
 const getBrand = async(req, res) => {
+    const { sortDirection, sortField, skip, limit } = req.query
+
     const { slug } = req.params;
     const foundBrand = await BrandModel.findOne({ slug })
     const brandId = foundBrand.id
-    const foundProduct = await ProductModel.findOne({ brandId })
+
+    // FILTER
+    const brandFilter = brandId ? { brandId } : {}
+
+    // SORT
+    const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
+    const sortParams = sortField ? {
+        [sortField]: sortDirectionParams
+    } : {}
+
+    // PAGINATION
+    const pagination = {
+        skip: skip ? Number(skip) : 0,
+        limit: limit ? Number(limit) : 100
+    }
+
+    const [foundProduct, totalProduct] = await Promise.all([
+        ProductModel
+        .find(brandFilter)
+        .sort(sortParams)
+        .skip(pagination.skip)
+        .limit(pagination.limit),
+        ProductModel.find(brandFilter).countDocuments()
+    ])
+
     res.send({
         success: 1,
         data: foundProduct
@@ -25,9 +77,7 @@ const getBrand = async(req, res) => {
 const createBrand = async(req, res) => {
     const brandData = req.body;
     const name = brandData.name
-    if (!name) {
-        throw new HttpError("Brand không được để trống", 422)
-    }
+
     const existedBrand = await BrandModel.findOne({ name })
     if (existedBrand) {
         throw new HttpError("Brand đã tồn tại", 400)
@@ -56,6 +106,7 @@ const updateBrand = async(req, res) => {
             throw new HttpError("Brand đã tồn tại", 400)
         }
     }
+
     console.log("hi");
     const existedSubCategory = await SubCategoryModel.findById(subCategoryId)
     if (!existedSubCategory) {

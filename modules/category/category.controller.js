@@ -28,9 +28,6 @@ const getCategory = async(req, res) => {
 const createCategory = async(req, res) => {
     const { name } = req.body;
 
-    if (!name) {
-        throw new HttpError("Category không được để trống", 422)
-    }
     const existedCategory = await CategoryModel.findOne({ name })
     if (existedCategory) {
         throw new HttpError("Category đã tồn tại", 400)
@@ -46,9 +43,7 @@ const createCategory = async(req, res) => {
 const updateCategory = async(req, res) => {
     const { slug } = req.params;
     const { name } = req.body;
-    if (!name) {
-        throw new HttpError("Category không được để trống", 422)
-    }
+
     const existedCategory = await CategoryModel.findOne({ name });
     console.log(name);
     if (existedCategory) {

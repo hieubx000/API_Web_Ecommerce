@@ -18,10 +18,6 @@ const BrandSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         required: true
     },
-    brand: {
-        type: String,
-        required: true
-    },
     imgBrand: {
         type: String,
         required: true
@@ -31,7 +27,7 @@ const BrandSchema = mongoose.Schema({
         required: true
     }
 }, {
-    timestamp: true
+    timestamps: true
 })
 
 const BrandModel = mongoose.model("Brand", BrandSchema)

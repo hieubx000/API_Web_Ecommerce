@@ -32,18 +32,18 @@ const ProductSchema = mongoose.Schema({
     },
     subCategoryId: {
         type: mongoose.Types.ObjectId,
-
+        ref: 'SubCategory'
     },
     brandId: {
         type: mongoose.Types.ObjectId,
-
+        ref: 'Brand'
     },
     warranty: {
         type: Number,
         required: true
     }
 }, {
-    timestamp: true
+    timestamps: true
 })
 
 const ProductModel = mongoose.model('Product', ProductSchema)

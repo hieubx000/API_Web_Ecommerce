@@ -31,9 +31,7 @@ const getSubCategory = async(req, res) => {
 const createSubCategory = async(req, res) => {
     const { name, categoryId } = req.body;
 
-    if (!name) {
-        throw new HttpError("Sub-Category không được để trống", 422)
-    }
+
     const existedSubCategory = await SubCategoryModel.findOne({ name })
     if (existedSubCategory) {
         throw new HttpError("Sub-Category đã tồn tại", 400)
@@ -53,9 +51,7 @@ const createSubCategory = async(req, res) => {
 const updateSubCategory = async(req, res) => {
     const { slug } = req.params;
     const { name, categoryId } = req.body;
-    if (!name) {
-        throw new HttpError("Sub-Category không được để trống", 422)
-    }
+
     const existedSubCategory = await SubCategoryModel.findOne({ name });
     const existedSubCategoryBySlug = await SubCategoryModel.findOne({ slug })
     if (existedSubCategory) {
