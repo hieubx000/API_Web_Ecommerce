@@ -16,7 +16,8 @@ const BrandSchema = mongoose.Schema({
     },
     subCategoryId: {
         type: mongoose.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'SubCategory'
     },
     imgBrand: {
         type: String,

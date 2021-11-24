@@ -46,7 +46,7 @@ const getBrand = async(req, res) => {
 
     // FILTER
     const brandFilter = brandId ? { brandId } : {}
-
+    console.log(brandFilter);
     // SORT
     const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
     const sortParams = sortField ? {

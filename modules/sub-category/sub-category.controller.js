@@ -5,10 +5,35 @@ const ProductModel = require('../product/product');
 const BrandModel = require('../brand/brand')
 
 const getAllSubCategory = async(req, res) => {
-    const category = await SubCategoryModel.find();
+    const { keyword, sortDirection, sortField, skip, limit } = req.query
+
+    // FILTER
+    const keywordFilter = keyword ? { name: { $regex: new RegExp(keyword, 'i') } } : {};
+
+    // SORT
+    const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
+    const sortParams = sortField ? {
+        [sortField]: sortDirectionParams
+    } : {}
+
+    // PAGINATION
+    const pagination = {
+        skip: skip ? Number(skip) : 0,
+        limit: limit ? Number(limit) : 100
+    }
+
+    const [subCategory, totalSubCategory] = await Promise.all([
+        SubCategoryModel
+        .find(keywordFilter)
+        .sort(sortParams)
+        .skip(pagination.skip)
+        .limit(pagination.limit),
+        SubCategoryModel.find(keywordFilter).countDocuments()
+    ])
     res.send({
         success: 1,
-        data: category
+        data: subCategory,
+        total: totalSubCategory
     })
 }
 
@@ -16,15 +41,34 @@ const getSubCategory = async(req, res) => {
     const { slug } = req.params;
     const foundSubCategory = await SubCategoryModel.findOne({ slug })
     const subCategoryId = foundSubCategory.id
-    const foundProduct = await ProductModel.findOne({ subCategoryId })
 
-    const foundBrand = await BrandModel.findOne({ subCategoryId })
-    const brandId = foundBrand.id
-    console.log(foundBrand);
-    foundProduct += await ProductModel.findOne({ brandId })
+    var foundProduct = await ProductModel.findOne({ subCategoryId })
+        // console.log(foundProduct);
+    var product = 0;
+    if (foundProduct) {
+        product = foundProduct
+    } else {
+        const subCategoryFilter = subCategoryId ? { subCategoryId } : {}
+        const foundBrand = await BrandModel.find(subCategoryFilter)
+        var brandId = []
+        console.log(foundBrand[0].id);
+        for (let i = 0; i < foundBrand.length; i++) {
+            brandId.push(foundBrand[i].id)
+        }
+        console.log(brandId);
+        // const brandId = foundBrand.id
+        var foundProduct1 = []
+        for (let i = 0; i < brandId.length; i++) {
+            const brandFilter = brandId[i] ? { brandId } : {}
+            foundProduct1 = await ProductModel.find(brandFilter)
+        }
+
+        product = foundProduct1
+    }
+
     res.send({
         success: 1,
-        data: foundProduct
+        data: product
     })
 }
 
