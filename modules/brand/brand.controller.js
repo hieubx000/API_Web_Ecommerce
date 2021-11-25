@@ -70,7 +70,8 @@ const getBrand = async(req, res) => {
 
     res.send({
         success: 1,
-        data: foundProduct
+        data: foundProduct,
+        total: totalProduct
     })
 }
 

@@ -42,11 +42,32 @@ const getSubCategory = async(req, res) => {
     const foundSubCategory = await SubCategoryModel.findOne({ slug })
     const subCategoryId = foundSubCategory.id
 
-    var foundProduct = await ProductModel.findOne({ subCategoryId })
+    const { sortDirection, sortField, skip, limit } = req.query
+    var total = 0;
+    // SORT
+    const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
+    const sortParams = sortField ? {
+        [sortField]: sortDirectionParams
+    } : {}
+
+    // PAGINATION
+    const pagination = {
+        skip: skip ? Number(skip) : 0,
+        limit: limit ? Number(limit) : 24
+    }
+    const [foundProductOfBrand, totalProductOfBrand] = await Promise.all([
+            ProductModel
+            .findOne({ subCategoryId })
+            .sort(sortParams)
+            .skip(pagination.skip)
+            .limit(pagination.limit),
+            ProductModel.findOne({ subCategoryId }).countDocuments()
+        ])
         // console.log(foundProduct);
     var product = 0;
-    if (foundProduct) {
-        product = foundProduct
+    if (foundProductOfBrand) {
+        product = foundProductOfBrand
+        total = totalProductOfBrand
     } else {
         const subCategoryFilter = subCategoryId ? { subCategoryId } : {}
         const foundBrand = await BrandModel.find(subCategoryFilter)
@@ -55,20 +76,40 @@ const getSubCategory = async(req, res) => {
         for (let i = 0; i < foundBrand.length; i++) {
             brandId.push(foundBrand[i].id)
         }
-        console.log(brandId);
-        // const brandId = foundBrand.id
-        var foundProduct1 = []
-        for (let i = 0; i < brandId.length; i++) {
-            const brandFilter = brandId[i] ? { brandId } : {}
-            foundProduct1 = await ProductModel.find(brandFilter)
+
+        // SORT
+        const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
+        const sortParams = sortField ? {
+            [sortField]: sortDirectionParams
+        } : {}
+
+        // PAGINATION
+        const pagination = {
+            skip: skip ? Number(skip) : 0,
+            limit: limit ? Number(limit) : 24
         }
 
-        product = foundProduct1
+        // var foundProduct1 = []
+        for (let i = 0; i < brandId.length; i++) {
+            const brandFilter = brandId[i] ? { brandId } : {}
+            var [foundProduct1, totalProductOfSubCategory] = await Promise.all([
+                ProductModel
+                .find(brandFilter)
+                .sort(sortParams)
+                .skip(pagination.skip)
+                .limit(pagination.limit),
+                ProductModel.find(brandFilter).countDocuments()
+            ])
+        }
+
+        product = foundProduct1;
+        total = totalProductOfSubCategory;
     }
 
     res.send({
         success: 1,
-        data: product
+        data: product,
+        total: total
     })
 }
 

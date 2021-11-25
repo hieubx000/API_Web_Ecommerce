@@ -1,23 +1,45 @@
 const CategoryModel = require('./category')
 const HttpError = require('../../common/httpError')
 
-const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator')
-
-mongoose.plugin(slug)
-
 const getAllCategory = async(req, res) => {
-    console.log("22");
-    const category = await CategoryModel.find();
+    const { keyword, sortDirection, sortField, skip, limit } = req.query
+
+    // FILTER
+    const keywordFilter = keyword ? { name: { $regex: new RegExp(keyword, 'i') } } : {};
+
+    // SORT
+    const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
+    const sortParams = sortField ? {
+        [sortField]: sortDirectionParams
+    } : {}
+
+    // PAGINATION
+    const pagination = {
+        skip: skip ? Number(skip) : 0,
+        limit: limit ? Number(limit) : 100
+    }
+
+    const [category, totalCategory] = await Promise.all([
+        CategoryModel
+        .find(keywordFilter)
+        .sort(sortParams)
+        .skip(pagination.skip)
+        .limit(pagination.limit),
+        CategoryModel.find(keywordFilter).countDocuments()
+    ])
+
     res.send({
         success: 1,
-        data: category
+        data: category,
+        total: totalCategory
     })
 }
 
 const getCategory = async(req, res) => {
     const { slug } = req.params;
     const foundCategory = await CategoryModel.findOne({ slug })
+
+
 
     res.send({
         success: 1,
@@ -49,14 +71,7 @@ const updateCategory = async(req, res) => {
     if (existedCategory) {
         throw new HttpError("Category đã tồn tại", 400)
     }
-    // const newSlug = {
-    //     slug: {
-    //         type: String,
-    //         slug: name,
-    //         unique: true,
-    //         lowercase: true
-    //     }
-    // }
+
     const updateCategory = await CategoryModel.findOneAndUpdate({ slug }, { name }, { new: true })
 
     res.send({
