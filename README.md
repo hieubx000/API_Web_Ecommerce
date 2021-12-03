@@ -1,4 +1,4 @@
-Category => Sub-Category => brand => product
+Category => Sub-Category => brand => product.
 Category => Sub-Category => product
 
 # Những thứ cần sửa lỗi
