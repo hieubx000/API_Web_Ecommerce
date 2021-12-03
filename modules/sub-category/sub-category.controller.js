@@ -70,9 +70,10 @@ const getSubCategory = async(req, res) => {
         total = totalProductOfBrand
     } else {
         const subCategoryFilter = subCategoryId ? { subCategoryId } : {}
+        console.log("hi", subCategoryFilter);
         const foundBrand = await BrandModel.find(subCategoryFilter)
         var brandId = []
-        console.log(foundBrand[0].id);
+
         for (let i = 0; i < foundBrand.length; i++) {
             brandId.push(foundBrand[i].id)
         }
@@ -92,6 +93,7 @@ const getSubCategory = async(req, res) => {
         // var foundProduct1 = []
         for (let i = 0; i < brandId.length; i++) {
             const brandFilter = brandId[i] ? { brandId } : {}
+
             var [foundProduct1, totalProductOfSubCategory] = await Promise.all([
                 ProductModel
                 .find(brandFilter)
