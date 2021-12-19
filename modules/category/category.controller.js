@@ -50,13 +50,16 @@ const getCategory = async(req, res) => {
     for (let i = 0; i < foundSubCategory.length; i++) {
         subCategoryId.push(foundSubCategory[i].id)
     }
+
     var total = 0;
     var product = [];
     for (let i = 0; i < subCategoryId.length; i++) {
 
+
+        // console.log(foundSubCategory[i].id);
         var subCategoryId1 = subCategoryId[i]
-        console.log(subCategoryId1);
-        // SORT
+            // console.log(subCategoryId1);
+            // SORT
         const sortDirectionParams = sortDirection ? Number(sortDirection) : -1
         const sortParams = sortField ? {
             [sortField]: sortDirectionParams
@@ -79,19 +82,23 @@ const getCategory = async(req, res) => {
 
         if (foundProductOfBrand) {
             product.push(foundProductOfBrand)
-            foundProductOfBrand = null;
-            total = totalProductOfBrand
+            foundProductOfBrand = [];
+            total += totalProductOfBrand
+                // console.log(i);
         } else {
-            const subCategoryFilter = subCategoryId1 ? { subCategoryId } : {}
-                // console.log(subCategoryFilter);
-                // const foundSubCategory
-                // for (let j = 0; j < subCategoryFilter.length; j++) {
-                //     console.log(j);
-                // }
-
-            const foundBrand = await BrandModel.find(subCategoryFilter)
+            // console.log(subCategoryId1);
+            // const subCategoryFilter = subCategoryId1 ? { subCategoryId } : {}
+            // console.log(subCategoryFilter);
+            // const foundSubCategory
+            // for (let j = 0; j < subCategoryFilter.length; j++) {
+            //     console.log(j);
+            // }
+            const filter = {
+                id: subCategoryId1
+            }
+            let foundBrand = await BrandModel.find({ subCategoryId: { $in: subCategoryId1 } })
             var brandId = []
-                // console.log(foundBrand);
+                // console.log(brandId);
             for (let i = 0; i < foundBrand.length; i++) {
                 brandId.push(foundBrand[i].id)
             }
@@ -104,11 +111,13 @@ const getCategory = async(req, res) => {
 
             // PAGINATION
             const pagination = {
-                skip: skip ? Number(skip) : 0,
-                limit: limit ? Number(limit) : 24
-            }
+                    skip: skip ? Number(skip) : 0,
+                    limit: limit ? Number(limit) : 24
+                }
+                // console.log(brandId);
+            if (brandId.length > 0) {
 
-            // var foundProduct1 = []
+            }
             for (let i = 0; i < brandId.length; i++) {
                 const brandFilter = brandId[i] ? { brandId } : {}
                 var [foundProduct1, totalProductOfSubCategory] = await Promise.all([
@@ -120,10 +129,10 @@ const getCategory = async(req, res) => {
                     ProductModel.find(brandFilter).countDocuments()
                 ])
             }
-
+            // console.log(foundProduct1);
             product.push(foundProduct1)
             foundProduct1 = null;
-            total = totalProductOfSubCategory;
+            total += totalProductOfSubCategory;
 
         }
 
