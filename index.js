@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 require("express-async-errors")
+const cors = require('cors')
 const mongoose = require('mongoose')
 const CategoryRouter = require('./modules/category')
 const SubCategoryRouter = require('./modules/sub-category')
@@ -15,8 +16,8 @@ async function main() {
 
     const app = express();
     app.use(express.json());
-
-    // app.use('/uploads')
+    app.use(cors())
+        // app.use('/uploads')
 
     app.use('/category/', CategoryRouter)
     app.use('/sub-category', SubCategoryRouter)
